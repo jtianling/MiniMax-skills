@@ -1,33 +1,13 @@
-# Getting Started
+# 运行环境
 
-## 1. Set API key
+媒体生成使用 [平台工具](platform-media.md), 不配置 MiniMax API key, 不安装供应商 CLI 或 requests 来绕过平台.  工具只在当前对话实际暴露时可调用, 不从 shell 环境变量判断平台能力.
 
-```bash
-export MINIMAX_API_KEY="<paste-your-key-here>"
-```
+先检查当前工作区和已有项目, 复用框架, package.json 和锁文件.  仅添加当前页面实际需要的依赖, 不同时安装整个动效选型表.  云端沙箱不是用户电脑, 不能假定已有用户项目, 登录态或持久部署.
 
-## 2. Install dependencies
+页面预览先确认实际浏览器工具及接口.  Playwright 库, agent-browser 和浏览器 MCP 不是同一接口.  没有浏览器时报告未预览, 不捏造截图或通过结论.
 
-```bash
-pip install requests
+FFmpeg, ffprobe 和图片处理库仅用于需要的后处理, 使用前检查可用性.  缺少必需依赖时记录具体缺项.  创建截图和产物目录后再写文件.
 
-# FFmpeg (optional, for audio post-processing)
-# macOS:
-brew install ffmpeg
-# Ubuntu:
-sudo apt install ffmpeg
-```
+需要开发服务器时, 用当前运行器支持的后台方式启动, 保存日志与精确 PID, 通过就绪检查后再预览.  不让长驻前台进程阻塞后续步骤.  结束后只清理本任务创建的精确进程.
 
-## 3. Quick test
-
-```bash
-python scripts/minimax_tts.py "Hello world" -o test.mp3
-```
-
-If successful, you'll see `OK: xxxxx bytes -> test.mp3`.
-
-## Next steps
-
-- **Voice selection**: See [minimax-voice-catalog.md](minimax-voice-catalog.md)
-- **TTS workflows**: See [minimax-tts-guide.md](minimax-tts-guide.md)
-- **Troubleshooting**: See [troubleshooting.md](troubleshooting.md)
+通过平台实际提供的文件/网页工具交付真实网页和项目素材.  不自动部署到外部账号或承诺持久托管.

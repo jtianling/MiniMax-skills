@@ -28,6 +28,10 @@ metadata:
 
 Build complete, production-ready frontend pages by orchestrating 5 specialized capabilities: design engineering, motion systems, AI-generated assets, persuasive copy, and generative art.
 
+本 fork 面向 monkeys 平台.  原版来自 [MiniMax-AI/skills 的 frontend-dev](https://github.com/MiniMax-AI/skills/tree/60aaae52bb2af8162732751a4332f62a5fef518b/skills/frontend-dev), 保留其设计, 动效, 文案和视觉艺术流程.  媒体生成改用平台托管工具, 不使用供应商脚本或用户 API key.  修改版来源为 [jtianling/MiniMax-skills](https://github.com/jtianling/MiniMax-skills).  原作者, metadata.sources 和 MIT 许可证归属保留.
+
+素材阶段先读 [平台媒体接入](references/platform-media.md), 按当轮实际提供的工具 schema 调用.  工具不在 shell 中执行, 不自行构造平台 API 或供应商请求.  只生成本次网页所需的素材, 不为展示全部能力而额外生成图片, 视频或音频.
+
 ## Invocation
 
 ```
@@ -41,19 +45,9 @@ The user provides their request as natural language (e.g. "build a landing page 
 ```
 frontend-dev/
 ├── SKILL.md                      # Core skill (this file)
-├── scripts/                      # Asset generation scripts
-│   ├── minimax_tts.py            # Text-to-speech
-│   ├── minimax_music.py          # Music generation
-│   ├── minimax_video.py          # Video generation (async)
-│   └── minimax_image.py          # Image generation
 ├── references/                   # Detailed guides (read as needed)
-│   ├── minimax-cli-reference.md  # CLI flags quick reference
+│   ├── platform-media.md         # Platform tools and local asset integration
 │   ├── asset-prompt-guide.md     # Asset prompt engineering rules
-│   ├── minimax-tts-guide.md      # TTS usage & voices
-│   ├── minimax-music-guide.md    # Music prompts & lyrics format
-│   ├── minimax-video-guide.md    # Camera commands & models
-│   ├── minimax-image-guide.md    # Ratios & batch generation
-│   ├── minimax-voice-catalog.md  # All voice IDs
 │   ├── motion-recipes.md         # Animation code snippets
 │   ├── env-setup.md              # Environment setup
 │   └── troubleshooting.md        # Common issues
@@ -176,11 +170,11 @@ project/
 2. Plan motion sequences following performance guardrails
 
 ### Phase 3: Asset Generation
-Generate all image/video/audio assets using `scripts/`. NEVER use placeholder URLs (unsplash, picsum, placeholder.com, via.placeholder, placehold.co, etc.) or external URLs.
+按 [平台媒体接入](references/platform-media.md) 使用实际可用的 image_generate, video_generate, text_to_speech, music_generate 或 audio_generate.  不使用占位图站点或外链作为网页素材.
 
 1. Parse asset requirements (type, style, spec, usage)
 2. Craft optimized prompts, show to user, confirm before generating
-3. Execute via scripts, save to project — do NOT proceed to Phase 5 until all assets are saved locally
+3. 在确认的需求和数量内调用平台工具.  等待终态成功, 使用工具返回的真实 localPath, 核验文件后复制到当前框架的素材目录.  所需素材未就绪时不进入 Phase 5; 失败时交付具体诊断, 不伪造成功.
 
 ### Phase 4: Copywriting & Content
 Follow copywriting frameworks (AIDA, PAS, FAB) to craft all text content. Do NOT use "Lorem ipsum" — write real copy.
@@ -373,24 +367,25 @@ npm install three @react-three/fiber @react-three/drei  # 3D (lazy-load)
 
 # 3. Asset Generation
 
-## 3.1 Scripts
+## 3.1 平台工具
 
-| Type | Script | Pattern |
-|------|--------|---------|
-| TTS | `scripts/minimax_tts.py` | Sync |
-| Music | `scripts/minimax_music.py` | Sync |
-| Video | `scripts/minimax_video.py` | Async (create → poll → download) |
-| Image | `scripts/minimax_image.py` | Sync |
+| 素材 | 工具 | 输入依据 |
+| --- | --- | --- |
+| 图片 | `image_generate` | 当前 schema 的 prompt 与可选参数 |
+| 视频 | `video_generate` | 当前 schema 的 prompt 与可选参数 |
+| 配音 | `text_to_speech` | 当前 schema 的 text 与可选参数 |
+| 背景音乐 | `music_generate` | 当前 schema 的 prompt 与可选参数 |
+| 其他音频 | `audio_generate` | 当前 schema 的 prompt 与可选参数 |
 
-Env: `MINIMAX_API_KEY` (required).
+平台管理供应商凭据, 模型和计费.  不要求用户提供 MiniMax key, 不固定 MiniMax 的模型, voice ID 或命令参数.  只调用当轮实际暴露的工具; 缺失时报告具体能力缺口, 不自动换成供应商直连.
 
 ## 3.2 Workflow
 1. **Parse:** type, quantity, style, spec, usage
 2. **Craft prompt:** Be specific (composition, lighting, style). **NEVER** include text in image prompts.
-3. **Execute:** Show prompt to user, **MUST confirm before generating**, then run script
-4. **Save:** `<project>/public/assets/{images,videos,audio}/` as `{type}-{descriptor}-{timestamp}.{ext}` — **MUST save locally**
-5. **Post-process:** Images → WebP, Videos → ffmpeg compress, Audio → normalize
-6. **Deliver:** File path + code snippet + CSS suggestion
+3. **调用:** 向用户展示素材计划和提示词, 确认后调用平台工具.  已获确认的同一计划直接继续, 不重复询问.
+4. **接入:** 按 Project Structure 选择素材目录, 核验工具结果中的本地文件并复制过去.  文件扩展名与实际格式一致, 不通过改后缀伪装转码.
+5. **后处理:** 仅在实际工具可用且任务需要时转 WebP, 压缩视频或处理音量.  缺少必需依赖时报告, 不声称已执行.
+6. **交付:** 用平台实际提供的交付工具返回完成的网页和包含本地依赖的项目包.  素材作为合成输入时不重复交付; 具体规则见平台媒体接入.
 
 ## 3.3 Preset Shortcuts
 
@@ -401,20 +396,17 @@ Env: `MINIMAX_API_KEY` (required).
 | `icon` | 1:1, flat, clean background |
 | `avatar` | 1:1, portrait, circular crop ready |
 | `banner` | 21:9, OG/social |
-| `bg-video` | 768P, 6s, `[Static shot]` |
-| `video-hd` | 1080P, 6s |
-| `bgm` | 30s, no vocals, loopable |
-| `tts` | MiniMax HD, MP3 |
+| `bg-video` | 短循环背景视频, 稳定镜头; 时长和分辨率受实际模型约束 |
+| `video-hd` | 高清视频目标; 以实际 schema 和输出为准 |
+| `bgm` | 无演唱背景音乐, 循环与时长作为目标, 以实际能力和文件核验为准 |
+| `tts` | 按用户语言配音; 音色和格式以实际模型为准 |
 
 ## 3.4 Reference
 
-- `references/minimax-cli-reference.md` — CLI flags
-- `references/asset-prompt-guide.md` — Prompt rules
-- `references/minimax-voice-catalog.md` — Voice IDs
-- `references/minimax-tts-guide.md` — TTS usage
-- `references/minimax-music-guide.md` — Music generation (prompts, lyrics, structure tags)
-- `references/minimax-video-guide.md` — Camera commands
-- `references/minimax-image-guide.md` — Ratios, batch
+- [平台媒体接入](references/platform-media.md): 工具选择, 文件接入, 参数边界和交付.
+- [素材提示词](references/asset-prompt-guide.md): 图片, 视频, 音乐和配音的需求表达.
+- [运行环境](references/env-setup.md): 沙箱和实际依赖检查.
+- [排错](references/troubleshooting.md): 工具失败, 本地文件和预览问题.
 
 ---
 

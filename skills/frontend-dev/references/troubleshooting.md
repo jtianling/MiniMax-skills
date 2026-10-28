@@ -1,85 +1,16 @@
-# Troubleshooting
+# 排错
 
-## Quick reference
+| 现象 | 核对与处理 |
+| --- | --- |
+| 缺媒体工具 | 检查当轮定义, 报告缺失工具名, 不改走供应商 API. |
+| 参数被拒绝 | 保存字段级错误, 对照实际 schema 核查, 不照搬 MiniMax 参数.  修正后需重新生成时先取得用户授权. |
+| 工具返回 error/detail | 记录工具名与具体原因, 保留已完成素材, 不仅写通用失败. |
+| pending 未完成 | 使用工具实际提供的状态机制, 不重复提交, 不猜 URL. |
+| 有 URL 无本地文件 | 检查 files/localPath, 报告文件接入错误, 不重复生成. |
+| 文件损坏或格式错误 | 核查真实类型, 大小和可解码性.  有工具才转换, 不只改后缀. |
+| 页面素材 404 | 核对框架静态目录, HTML 引用和真实文件.  public/ 与 static/ 通常不属于浏览器 URL. |
+| 截图保存失败 | 核查父目录, 浏览器接口和页面状态, 不把缺目录误判为缺浏览器. |
+| 音频不播放 | 核查音频可解码性和浏览器自动播放限制, 提供播放按钮. |
+| 服务器命令不返回 | 检查前台长驻问题, 用后台方式和精确 PID 管理, 查看日志和就绪响应. |
 
-| Error | Cause | Fix |
-|-------|-------|-----|
-| `MINIMAX_API_KEY is not set` | Key not set | `export MINIMAX_API_KEY="key"` |
-| `401 Unauthorized` | Invalid/expired key | Check key validity |
-| `429 Too Many Requests` | Rate limit | Add delays between requests |
-| `TimeoutError` | Network or long text | Use async TTS for long text, check network |
-| `invalid params, method t2a-v2 not have model` | Wrong model name | Use `speech-2.8-hd` (hyphens, not underscores) |
-| `brotli: decoder process called...` | Encoding issue | Already fixed in utils.py (Accept-Encoding header) |
-
-## Environment
-
-### API key not set
-
-```bash
-export MINIMAX_API_KEY="<paste-your-key-here>"
-
-# Verify
-echo $MINIMAX_API_KEY
-```
-
-### FFmpeg not found
-
-```bash
-# macOS
-brew install ffmpeg
-
-# Ubuntu
-sudo apt install ffmpeg
-
-# Verify
-ffmpeg -version
-```
-
-### Missing Python packages
-
-```bash
-pip install requests
-```
-
-## API errors
-
-### Authentication (401)
-
-- Verify API key is correct and not expired
-- Check for extra spaces in key value
-
-### Rate limiting (429)
-
-Add delays between requests:
-```python
-import time
-for text in texts:
-    result = tts(text)
-    time.sleep(1)
-```
-
-### Invalid model name
-
-Valid names (use hyphens, must include -hd or -turbo):
-- `speech-2.8-hd` (recommended)
-- `speech-2.8-turbo`
-- `speech-2.6-hd`
-- `speech-2.6-turbo`
-
-Wrong: `speech_01`, `speech_2.6`, `speech-01`
-
-## Audio issues
-
-### Poor quality
-
-Re-generate with higher settings:
-```bash
-python scripts/minimax_tts.py "text" -o out.mp3 --sample-rate 32000 --model speech-2.8-hd
-```
-
-### Invalid emotion
-
-Valid emotions:
-- All models: happy, sad, angry, fearful, disgusted, surprised, calm
-- speech-2.6 only: + fluent, whisper
-- speech-2.8: auto-matched (leave empty, recommended)
+失败报告区分生成, 文件接入, 页面集成和交付阶段.  保留具体错误和已生成文件, 不输出密钥, 保护头或授权 URL.  生成已成功时, 不因页面或交付失败再次付费生成相同素材.

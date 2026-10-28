@@ -1,43 +1,15 @@
-# Prompt Engineering Guide
+# 素材提示词
 
-## Image Prompts
+先明确用途, 构图, 风格, 数量和目标规格, 展示计划并确认后使用 [平台媒体工具](platform-media.md).  只生成页面所需素材, 不给简单网页额外添加视频或配音.
 
-- Be specific about composition: "left-aligned subject with negative space on the right for text overlay"
-- Specify lighting: "soft studio lighting", "golden hour backlight", "flat diffused light"
-- Include style modifiers: "editorial photography", "3D render", "flat vector illustration"
-- Add technical specs: "4K resolution, sharp focus, shallow depth of field"
-- For web assets: always mention "clean background", "web-optimized", "high contrast for readability"
-- **NEVER** include text in image prompts unless explicitly requested — AI text rendering is unreliable
+| 类型 | 提示词内容 |
+| --- | --- |
+| 图片 | 主体, 构图, 光线, 风格, 背景与文字预留空间.  页面文字用 HTML 排版, 不依赖图片生成精确文字. |
+| 视频 | 主体动作, 场景, 光线, 镜头运动和背景用途.  镜头用自然语言描述, 不把供应商 camera tags 当通用协议. |
+| 音乐 | 流派, 节奏, 乐器, 情绪, 有无演唱和背景使用场景.  无歌词输入能力时不保证精确歌词. |
+| 配音 | 用户确认的准确原文.  音色, 速度, 语言等仅在当前 schema 支持时设置. |
+| 其他音频 | 描述具体声音, 环境和用途, 先核对当前模型是否支持该任务. |
 
-## Video Prompts
+hero 可描述横向构图和标题留白, icon 可描述简洁轮廓和干净背景, avatar 可描述肖像及圆形裁切空间.  banner 的宽幅比例, 视频的目标时长和音乐的循环要求都需要结合实际模型能力核对, 不把这些设计目标当作已保证的生成规格.
 
-- Use MiniMax camera commands in brackets: `[Push in]`, `[Truck left]`, `[Tracking shot]`, etc.
-- Describe scene, subject, lighting, and mood — the API auto-optimizes prompts by default
-- For web backgrounds: keep 6s duration, add `[Static shot]` for stability
-- Max 2,000 characters
-
-## Audio / TTS
-
-- Specify genre, tempo (BPM), mood, and instruments
-- For background music: "no vocals, suitable for background, not distracting"
-- For sound effects: be extremely specific about the sound event
-- For TTS: choose voice matching content language and speaker gender
-
-## Preset Shortcuts
-
-| Shortcut | Spec |
-|----------|------|
-| `hero` | 16:9 (1280x720) image, cinematic, text-safe space |
-| `thumb` | 1:1 (1024x1024) image, centered subject |
-| `icon` | 1:1 (1024x1024), flat style, clean background |
-| `avatar` | 1:1 (1024x1024), portrait, circular crop ready |
-| `banner` | 21:9 (1344x576), OG/social banner |
-| `portrait` | 2:3 (832x1248), vertical portrait |
-| `mobile` | 9:16 (720x1280), mobile fullscreen |
-| `bg-video` | 768P, 6s, `[Static shot]`, MiniMax Hailuo-2.3 |
-| `video` | 768P, 6s, MiniMax Hailuo-2.3, prompt auto-optimized |
-| `video-hd` | 1080P, 6s, MiniMax Hailuo-2.3 |
-| `bgm` | 30s background music, no vocals, loopable |
-| `sfx` | Short sound effect, < 3s |
-| `tts` | Text-to-speech, MiniMax HD, MP3 |
-| `narration` | Expressive narration voice, MiniMax |
+结果以真实文件为准.  需要循环时检查首尾衔接, 需要压缩或裁切时实际处理后再交付, 不以提示词代替产物检查.
